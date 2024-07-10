@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+
+import 'package:http/http.dart' as http;
 import 'package:shoping_app/data/categories.dart';
 import 'package:shoping_app/models/category.dart';
 import 'package:shoping_app/models/glosory_items.dart';
@@ -16,18 +20,39 @@ class _NewItemsState extends State<NewItems> {
   var _Quantity = 0;
   var _selectedCategories = categories[Categories.vegetables]!;
 
-  void _savedItems() {
+  void _savedItems() async {
     if (_formKey.currentState!.validate()) {
-      // Save the form data
-      // Implement your logic here
       _formKey.currentState!.save();
-      Navigator.of(context).pop(
-        GroceryItem(
-            id: DateTime.now().toString(),
-            name: _enterName,
-            quantity: _Quantity,
-            category: _selectedCategories),
+      final url = Uri.https('flutter-test-6ba5c-default-rtdb.firebaseio.com',
+          'shoping-list.json');
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-type': 'application/json',
+        },
+        body: json.encode(
+          {
+            'name': _enterName,
+            'quantity': _Quantity,
+            'category': _selectedCategories.title,
+          },
+        ),
       );
+      print(response.body);
+      print(response.statusCode);
+      if (!context.mounted) {
+        return;
+      }
+      Navigator.of(context).pop();
+      // response.
+      // Navigator.of(context).pop(
+      //   GroceryItem(
+      //     id: DateTime.now().toString(),
+      //     name: _enterName,
+      //     quantity: _Quantity,
+      //     category: _selectedCategories,
+      //   ),
+      // );
     }
   }
 
